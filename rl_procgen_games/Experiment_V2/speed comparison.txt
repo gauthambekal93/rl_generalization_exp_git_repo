@@ -1,0 +1,50 @@
+0.149
+
+
+ Reward rate : 0.005 
+
+Single envs
+with(stack frames)
+Total time steps  999 Time take  67.26151943206787
+
+Total time steps  999 Time take  65.21987557411194
+
+without stack frames (50 envs)
+Total time steps  49950 Time take  264.4862926006317
+
+without stack frames (100 envs)
+Total time steps  99900 Time take  522.8769931793213
+
+without stack frames (20 envs)
+Total time steps  19980 Time take  98.9276795387268
+
+
+Single env
+Total time steps  20000 Time take  3.8942267894744873
+
+
+
+1000 time steps
+2.35 seconds with gpu in forward prop 
+0.32 with a constant action no neural net, hardcoded action
+3.3656837940216064 seconds without gpu
+
+#--------------------------------------------------
+Single env ==> Using random actions
+20000 steps
+between 0.60 to 1 sec 
+
+20 env ==> Using random actions
+20000 steps
+between 0.14 to 0.17
+#--------------------------------------------------
+
+
+#---------------------------------------------------
+Single env ==> Using neural net to obtain actions along with critic calculation at every time step
+35 to 45 secs 
+
+20 env ==> Using neural net to obtain actions along with critic calculation at every time step
+4 to 5 secs
+
+#---------------------------------------------------

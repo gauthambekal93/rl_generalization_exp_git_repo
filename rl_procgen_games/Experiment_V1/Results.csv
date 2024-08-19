@@ -1,0 +1,403 @@
+Type,Time_Steps,Total_Rewards,Reward_Rate
+Test - Datasize: 5000,0,20.0,0.004
+Test - Datasize: 5000,0,400.0,0.08
+Train - Datasize: 10000 ,10000,770.0,0.077
+Test - Datasize: 5000,10000,500.0,0.1
+Train - Datasize: 10000 ,20000,480.0,0.048
+Test - Datasize: 5000,20000,130.0,0.026
+Train - Datasize: 10000 ,30000,110.0,0.011
+Test - Datasize: 5000,30000,220.0,0.044
+Train - Datasize: 10000 ,40000,750.0,0.075
+Test - Datasize: 5000,40000,440.0,0.088
+Train - Datasize: 10000 ,50000,1140.0,0.114
+Test - Datasize: 5000,50000,600.0,0.12
+Train - Datasize: 10000 ,60000,1030.0,0.103
+Test - Datasize: 5000,60000,550.0,0.11
+Train - Datasize: 10000 ,70000,1010.0,0.101
+Test - Datasize: 5000,70000,530.0,0.106
+Train - Datasize: 10000 ,80000,1060.0,0.106
+Test - Datasize: 5000,80000,620.0,0.124
+Train - Datasize: 10000 ,90000,1030.0,0.103
+Test - Datasize: 5000,90000,570.0,0.114
+Train - Datasize: 10000 ,100000,1070.0,0.107
+Test - Datasize: 5000,100000,520.0,0.104
+Train - Datasize: 10000 ,110000,1020.0,0.102
+Test - Datasize: 5000,110000,540.0,0.108
+Train - Datasize: 10000 ,120000,1100.0,0.11
+Test - Datasize: 5000,120000,530.0,0.106
+Train - Datasize: 10000 ,130000,990.0,0.099
+Test - Datasize: 5000,130000,520.0,0.104
+Train - Datasize: 10000 ,140000,1160.0,0.116
+Test - Datasize: 5000,140000,570.0,0.114
+Train - Datasize: 10000 ,150000,1140.0,0.114
+Test - Datasize: 5000,150000,490.0,0.098
+Train - Datasize: 10000 ,160000,1040.0,0.104
+Test - Datasize: 5000,160000,560.0,0.112
+Train - Datasize: 10000 ,170000,990.0,0.099
+Test - Datasize: 5000,170000,500.0,0.1
+Train - Datasize: 10000 ,180000,930.0,0.093
+Test - Datasize: 5000,180000,510.0,0.102
+Train - Datasize: 10000 ,190000,870.0,0.087
+Test - Datasize: 5000,190000,370.0,0.074
+Train - Datasize: 10000 ,200000,840.0,0.084
+Test - Datasize: 5000,200000,340.0,0.068
+Train - Datasize: 10000 ,210000,820.0,0.082
+Test - Datasize: 5000,210000,360.0,0.072
+Train - Datasize: 10000 ,220000,580.0,0.058
+Test - Datasize: 5000,220000,260.0,0.052
+Train - Datasize: 10000 ,230000,650.0,0.065
+Test - Datasize: 5000,230000,260.0,0.052
+Train - Datasize: 10000 ,240000,630.0,0.063
+Test - Datasize: 5000,240000,500.0,0.1
+Train - Datasize: 10000 ,250000,910.0,0.091
+Test - Datasize: 5000,250000,450.0,0.09
+Train - Datasize: 10000 ,260000,1050.0,0.105
+Test - Datasize: 5000,260000,460.0,0.092
+Train - Datasize: 10000 ,270000,1000.0,0.1
+Test - Datasize: 5000,270000,390.0,0.078
+Train - Datasize: 10000 ,280000,570.0,0.057
+Test - Datasize: 5000,280000,270.0,0.054
+Train - Datasize: 10000 ,290000,690.0,0.069
+Test - Datasize: 5000,290000,260.0,0.052
+Train - Datasize: 10000 ,300000,400.0,0.04
+Test - Datasize: 5000,300000,220.0,0.044
+Train - Datasize: 10000 ,310000,390.0,0.039
+Test - Datasize: 5000,310000,250.0,0.05
+Train - Datasize: 10000 ,320000,550.0,0.055
+Test - Datasize: 5000,320000,420.0,0.084
+Train - Datasize: 10000 ,330000,1000.0,0.1
+Test - Datasize: 5000,330000,520.0,0.104
+Train - Datasize: 10000 ,340000,980.0,0.098
+Test - Datasize: 5000,340000,420.0,0.084
+Train - Datasize: 10000 ,350000,840.0,0.084
+Test - Datasize: 5000,350000,370.0,0.074
+Train - Datasize: 10000 ,360000,810.0,0.081
+Test - Datasize: 5000,360000,430.0,0.086
+Train - Datasize: 10000 ,370000,790.0,0.079
+Test - Datasize: 5000,370000,520.0,0.104
+Train - Datasize: 10000 ,380000,950.0,0.095
+Test - Datasize: 5000,380000,430.0,0.086
+Train - Datasize: 10000 ,390000,1060.0,0.106
+Test - Datasize: 5000,390000,460.0,0.092
+Train - Datasize: 10000 ,400000,990.0,0.099
+Test - Datasize: 5000,400000,440.0,0.088
+Train - Datasize: 10000 ,410000,840.0,0.084
+Test - Datasize: 5000,410000,490.0,0.098
+Train - Datasize: 10000 ,420000,950.0,0.095
+Test - Datasize: 5000,420000,490.0,0.098
+Train - Datasize: 10000 ,430000,990.0,0.099
+Test - Datasize: 5000,430000,450.0,0.09
+Train - Datasize: 10000 ,440000,820.0,0.082
+Test - Datasize: 5000,440000,530.0,0.106
+Train - Datasize: 10000 ,450000,790.0,0.079
+Test - Datasize: 5000,450000,460.0,0.092
+Train - Datasize: 10000 ,460000,990.0,0.099
+Test - Datasize: 5000,460000,460.0,0.092
+Train - Datasize: 10000 ,470000,790.0,0.079
+Test - Datasize: 5000,470000,360.0,0.072
+Train - Datasize: 10000 ,480000,670.0,0.067
+Test - Datasize: 5000,480000,210.0,0.042
+Train - Datasize: 10000 ,490000,740.0,0.074
+Test - Datasize: 5000,490000,440.0,0.088
+Train - Datasize: 10000 ,500000,960.0,0.096
+Test - Datasize: 5000,500000,580.0,0.116
+Train - Datasize: 10000 ,510000,1070.0,0.107
+Test - Datasize: 5000,510000,410.0,0.082
+Train - Datasize: 10000 ,520000,790.0,0.079
+Test - Datasize: 5000,520000,460.0,0.092
+Train - Datasize: 10000 ,530000,800.0,0.08
+Test - Datasize: 5000,530000,410.0,0.082
+Train - Datasize: 10000 ,540000,840.0,0.084
+Test - Datasize: 5000,540000,470.0,0.094
+Train - Datasize: 10000 ,550000,1030.0,0.103
+Test - Datasize: 5000,550000,420.0,0.084
+Train - Datasize: 10000 ,560000,800.0,0.08
+Test - Datasize: 5000,560000,550.0,0.11
+Train - Datasize: 10000 ,570000,910.0,0.091
+Test - Datasize: 5000,570000,510.0,0.102
+Train - Datasize: 10000 ,580000,940.0,0.094
+Test - Datasize: 5000,580000,400.0,0.08
+Train - Datasize: 10000 ,590000,820.0,0.082
+Test - Datasize: 5000,590000,370.0,0.074
+Train - Datasize: 10000 ,600000,900.0,0.09
+Test - Datasize: 5000,600000,560.0,0.112
+Train - Datasize: 10000 ,610000,1010.0,0.101
+Test - Datasize: 5000,610000,320.0,0.064
+Train - Datasize: 10000 ,620000,840.0,0.084
+Test - Datasize: 5000,620000,500.0,0.1
+Train - Datasize: 10000 ,630000,990.0,0.099
+Test - Datasize: 5000,630000,580.0,0.116
+Train - Datasize: 10000 ,640000,1050.0,0.105
+Test - Datasize: 5000,640000,480.0,0.096
+Train - Datasize: 10000 ,650000,900.0,0.09
+Test - Datasize: 5000,650000,460.0,0.092
+Train - Datasize: 10000 ,660000,1060.0,0.106
+Test - Datasize: 5000,660000,610.0,0.122
+Train - Datasize: 10000 ,670000,1120.0,0.112
+Test - Datasize: 5000,670000,560.0,0.112
+Train - Datasize: 10000 ,680000,1220.0,0.122
+Test - Datasize: 5000,680000,640.0,0.128
+Train - Datasize: 10000 ,690000,1140.0,0.114
+Test - Datasize: 5000,690000,760.0,0.152
+Train - Datasize: 10000 ,700000,1040.0,0.104
+Test - Datasize: 5000,700000,620.0,0.124
+Train - Datasize: 10000 ,710000,1100.0,0.11
+Test - Datasize: 5000,710000,520.0,0.104
+Train - Datasize: 10000 ,720000,870.0,0.087
+Test - Datasize: 5000,720000,520.0,0.104
+Train - Datasize: 10000 ,730000,930.0,0.093
+Test - Datasize: 5000,730000,590.0,0.118
+Train - Datasize: 10000 ,740000,1010.0,0.101
+Test - Datasize: 5000,740000,500.0,0.1
+Train - Datasize: 10000 ,750000,1160.0,0.116
+Test - Datasize: 5000,750000,580.0,0.116
+Train - Datasize: 10000 ,760000,1000.0,0.1
+Test - Datasize: 5000,760000,490.0,0.098
+Train - Datasize: 10000 ,770000,1230.0,0.123
+Test - Datasize: 5000,770000,570.0,0.114
+Train - Datasize: 10000 ,780000,1080.0,0.108
+Test - Datasize: 5000,780000,430.0,0.086
+Train - Datasize: 10000 ,790000,1090.0,0.109
+Test - Datasize: 5000,790000,540.0,0.108
+Train - Datasize: 10000 ,800000,1210.0,0.121
+Test - Datasize: 5000,800000,550.0,0.11
+Train - Datasize: 10000 ,810000,980.0,0.098
+Test - Datasize: 5000,810000,450.0,0.09
+Train - Datasize: 10000 ,820000,920.0,0.092
+Test - Datasize: 5000,820000,490.0,0.098
+Train - Datasize: 10000 ,830000,970.0,0.097
+Test - Datasize: 5000,830000,580.0,0.116
+Train - Datasize: 10000 ,840000,830.0,0.083
+Test - Datasize: 5000,840000,570.0,0.114
+Train - Datasize: 10000 ,850000,990.0,0.099
+Test - Datasize: 5000,850000,530.0,0.106
+Train - Datasize: 10000 ,860000,980.0,0.098
+Test - Datasize: 5000,860000,580.0,0.116
+Train - Datasize: 10000 ,870000,1090.0,0.109
+Test - Datasize: 5000,870000,530.0,0.106
+Train - Datasize: 10000 ,880000,1200.0,0.12
+Test - Datasize: 5000,880000,510.0,0.102
+Train - Datasize: 10000 ,890000,1120.0,0.112
+Test - Datasize: 5000,890000,560.0,0.112
+Train - Datasize: 10000 ,900000,1050.0,0.105
+Test - Datasize: 5000,900000,560.0,0.112
+Train - Datasize: 10000 ,910000,980.0,0.098
+Test - Datasize: 5000,910000,500.0,0.1
+Train - Datasize: 10000 ,920000,960.0,0.096
+Test - Datasize: 5000,920000,520.0,0.104
+Train - Datasize: 10000 ,930000,1040.0,0.104
+Test - Datasize: 5000,930000,510.0,0.102
+Train - Datasize: 10000 ,940000,1090.0,0.109
+Test - Datasize: 5000,940000,470.0,0.094
+Train - Datasize: 10000 ,950000,1100.0,0.11
+Test - Datasize: 5000,950000,490.0,0.098
+Train - Datasize: 10000 ,960000,1100.0,0.11
+Test - Datasize: 5000,960000,500.0,0.1
+Train - Datasize: 10000 ,970000,1130.0,0.113
+Test - Datasize: 5000,970000,540.0,0.108
+Train - Datasize: 10000 ,980000,1230.0,0.123
+Test - Datasize: 5000,980000,490.0,0.098
+Train - Datasize: 10000 ,990000,990.0,0.099
+Test - Datasize: 5000,990000,490.0,0.098
+Train - Datasize: 10000 ,1000000,1070.0,0.107
+Test - Datasize: 5000,1000000,590.0,0.118
+Train - Datasize: 10000 ,1010000,1030.0,0.103
+Test - Datasize: 5000,1010000,500.0,0.1
+Train - Datasize: 10000 ,1020000,1140.0,0.114
+Test - Datasize: 5000,1020000,600.0,0.12
+Train - Datasize: 10000 ,1030000,1080.0,0.108
+Test - Datasize: 5000,1030000,550.0,0.11
+Train - Datasize: 10000 ,1040000,960.0,0.096
+Test - Datasize: 5000,1040000,450.0,0.09
+Train - Datasize: 10000 ,1050000,930.0,0.093
+Test - Datasize: 5000,1050000,570.0,0.114
+Train - Datasize: 10000 ,1060000,1110.0,0.111
+Test - Datasize: 5000,1060000,520.0,0.104
+Train - Datasize: 10000 ,1070000,1070.0,0.107
+Test - Datasize: 5000,1070000,560.0,0.112
+Train - Datasize: 10000 ,1080000,1070.0,0.107
+Test - Datasize: 5000,1080000,600.0,0.12
+Train - Datasize: 10000 ,1090000,1080.0,0.108
+Test - Datasize: 5000,1090000,600.0,0.12
+Train - Datasize: 10000 ,1100000,1170.0,0.117
+Test - Datasize: 5000,1100000,630.0,0.126
+Train - Datasize: 10000 ,1110000,1120.0,0.112
+Test - Datasize: 5000,1110000,470.0,0.094
+Train - Datasize: 10000 ,1120000,1050.0,0.105
+Test - Datasize: 5000,1120000,520.0,0.104
+Train - Datasize: 10000 ,1130000,1040.0,0.104
+Test - Datasize: 5000,1130000,530.0,0.106
+Train - Datasize: 10000 ,1140000,1130.0,0.113
+Test - Datasize: 5000,1140000,610.0,0.122
+Train - Datasize: 10000 ,1150000,1120.0,0.112
+Test - Datasize: 5000,1150000,570.0,0.114
+Train - Datasize: 10000 ,1160000,1040.0,0.104
+Test - Datasize: 5000,1160000,430.0,0.086
+Train - Datasize: 10000 ,1170000,990.0,0.099
+Test - Datasize: 5000,1170000,550.0,0.11
+Train - Datasize: 10000 ,1180000,1030.0,0.103
+Test - Datasize: 5000,1180000,490.0,0.098
+Train - Datasize: 10000 ,1190000,970.0,0.097
+Test - Datasize: 5000,1190000,510.0,0.102
+Train - Datasize: 10000 ,1200000,830.0,0.083
+Test - Datasize: 5000,1200000,380.0,0.076
+Train - Datasize: 10000 ,1210000,640.0,0.064
+Test - Datasize: 5000,1210000,420.0,0.084
+Train - Datasize: 10000 ,1220000,900.0,0.09
+Test - Datasize: 5000,1220000,500.0,0.1
+Train - Datasize: 10000 ,1230000,1030.0,0.103
+Test - Datasize: 5000,1230000,550.0,0.11
+Train - Datasize: 10000 ,1240000,1010.0,0.101
+Test - Datasize: 5000,1240000,510.0,0.102
+Train - Datasize: 10000 ,1250000,900.0,0.09
+Test - Datasize: 5000,1250000,460.0,0.092
+Train - Datasize: 10000 ,1260000,840.0,0.084
+Test - Datasize: 5000,1260000,360.0,0.072
+Train - Datasize: 10000 ,1270000,1020.0,0.102
+Test - Datasize: 5000,1270000,560.0,0.112
+Train - Datasize: 10000 ,1280000,940.0,0.094
+Test - Datasize: 5000,1280000,500.0,0.1
+Train - Datasize: 10000 ,1290000,1030.0,0.103
+Test - Datasize: 5000,1290000,540.0,0.108
+Train - Datasize: 10000 ,1300000,1150.0,0.115
+Test - Datasize: 5000,1300000,560.0,0.112
+Train - Datasize: 10000 ,1310000,1060.0,0.106
+Test - Datasize: 5000,1310000,390.0,0.078
+Train - Datasize: 10000 ,1320000,1200.0,0.12
+Test - Datasize: 5000,1320000,540.0,0.108
+Train - Datasize: 10000 ,1330000,1210.0,0.121
+Test - Datasize: 5000,1330000,620.0,0.124
+Train - Datasize: 10000 ,1340000,1090.0,0.109
+Test - Datasize: 5000,1340000,650.0,0.13
+Train - Datasize: 10000 ,1350000,1060.0,0.106
+Test - Datasize: 5000,1350000,600.0,0.12
+Train - Datasize: 10000 ,1360000,1170.0,0.117
+Test - Datasize: 5000,1360000,530.0,0.106
+Train - Datasize: 10000 ,1370000,1190.0,0.119
+Test - Datasize: 5000,1370000,470.0,0.094
+Train - Datasize: 10000 ,1380000,1120.0,0.112
+Test - Datasize: 5000,1380000,670.0,0.134
+Train - Datasize: 10000 ,1390000,1050.0,0.105
+Test - Datasize: 5000,1390000,500.0,0.1
+Train - Datasize: 10000 ,1400000,1110.0,0.111
+Test - Datasize: 5000,1400000,520.0,0.104
+Train - Datasize: 10000 ,1410000,1090.0,0.109
+Test - Datasize: 5000,1410000,510.0,0.102
+Train - Datasize: 10000 ,1420000,1020.0,0.102
+Test - Datasize: 5000,1420000,510.0,0.102
+Train - Datasize: 10000 ,1430000,890.0,0.089
+Test - Datasize: 5000,1430000,470.0,0.094
+Train - Datasize: 10000 ,1440000,1240.0,0.124
+Test - Datasize: 5000,1440000,570.0,0.114
+Train - Datasize: 10000 ,1450000,1040.0,0.104
+Test - Datasize: 5000,1450000,520.0,0.104
+Train - Datasize: 10000 ,1460000,1170.0,0.117
+Test - Datasize: 5000,1460000,500.0,0.1
+Train - Datasize: 10000 ,1470000,970.0,0.097
+Test - Datasize: 5000,1470000,500.0,0.1
+Train - Datasize: 10000 ,1480000,860.0,0.086
+Test - Datasize: 5000,1480000,450.0,0.09
+Train - Datasize: 10000 ,1490000,920.0,0.092
+Test - Datasize: 5000,1490000,450.0,0.09
+Train - Datasize: 10000 ,1500000,1010.0,0.101
+Test - Datasize: 5000,1500000,450.0,0.09
+Train - Datasize: 10000 ,1510000,940.0,0.094
+Test - Datasize: 5000,1510000,390.0,0.078
+Train - Datasize: 10000 ,1520000,780.0,0.078
+Test - Datasize: 5000,1520000,400.0,0.08
+Train - Datasize: 10000 ,1530000,840.0,0.084
+Test - Datasize: 5000,1530000,300.0,0.06
+Train - Datasize: 10000 ,1540000,580.0,0.058
+Test - Datasize: 5000,1540000,420.0,0.084
+Train - Datasize: 10000 ,1550000,740.0,0.074
+Test - Datasize: 5000,1550000,330.0,0.066
+Train - Datasize: 10000 ,1560000,960.0,0.096
+Test - Datasize: 5000,1560000,450.0,0.09
+Train - Datasize: 10000 ,1570000,810.0,0.081
+Test - Datasize: 5000,1570000,420.0,0.084
+Train - Datasize: 10000 ,1580000,710.0,0.071
+Test - Datasize: 5000,1580000,380.0,0.076
+Train - Datasize: 10000 ,1590000,860.0,0.086
+Test - Datasize: 5000,1590000,450.0,0.09
+Train - Datasize: 10000 ,1600000,970.0,0.097
+Test - Datasize: 5000,1600000,670.0,0.134
+Train - Datasize: 10000 ,1610000,1000.0,0.1
+Test - Datasize: 5000,1610000,540.0,0.108
+Train - Datasize: 10000 ,1620000,1130.0,0.113
+Test - Datasize: 5000,1620000,570.0,0.114
+Train - Datasize: 10000 ,1630000,1160.0,0.116
+Test - Datasize: 5000,1630000,440.0,0.088
+Train - Datasize: 10000 ,1640000,1010.0,0.101
+Test - Datasize: 5000,1640000,710.0,0.142
+Train - Datasize: 10000 ,1650000,1150.0,0.115
+Test - Datasize: 5000,1650000,590.0,0.118
+Train - Datasize: 10000 ,1660000,1250.0,0.125
+Test - Datasize: 5000,1660000,630.0,0.126
+Train - Datasize: 10000 ,1670000,1280.0,0.128
+Test - Datasize: 5000,1670000,640.0,0.128
+Train - Datasize: 10000 ,1680000,1180.0,0.118
+Test - Datasize: 5000,1680000,570.0,0.114
+Train - Datasize: 10000 ,1690000,1090.0,0.109
+Test - Datasize: 5000,1690000,530.0,0.106
+Train - Datasize: 10000 ,1700000,1100.0,0.11
+Test - Datasize: 5000,1700000,460.0,0.092
+Train - Datasize: 10000 ,1710000,960.0,0.096
+Test - Datasize: 5000,1710000,560.0,0.112
+Train - Datasize: 10000 ,1720000,1170.0,0.117
+Test - Datasize: 5000,1720000,500.0,0.1
+Train - Datasize: 10000 ,1730000,900.0,0.09
+Test - Datasize: 5000,1730000,570.0,0.114
+Train - Datasize: 10000 ,1740000,1180.0,0.118
+Test - Datasize: 5000,1740000,480.0,0.096
+Train - Datasize: 10000 ,1750000,1250.0,0.125
+Test - Datasize: 5000,1750000,720.0,0.144
+Train - Datasize: 10000 ,1760000,1130.0,0.113
+Test - Datasize: 5000,1760000,480.0,0.096
+Train - Datasize: 10000 ,1770000,1010.0,0.101
+Test - Datasize: 5000,1770000,610.0,0.122
+Train - Datasize: 10000 ,1780000,890.0,0.089
+Test - Datasize: 5000,1780000,540.0,0.108
+Train - Datasize: 10000 ,1790000,1080.0,0.108
+Test - Datasize: 5000,1790000,530.0,0.106
+Train - Datasize: 10000 ,1800000,1050.0,0.105
+Test - Datasize: 5000,1800000,520.0,0.104
+Train - Datasize: 10000 ,1810000,970.0,0.097
+Test - Datasize: 5000,1810000,490.0,0.098
+Train - Datasize: 10000 ,1820000,910.0,0.091
+Test - Datasize: 5000,1820000,410.0,0.082
+Train - Datasize: 10000 ,1830000,1090.0,0.109
+Test - Datasize: 5000,1830000,510.0,0.102
+Train - Datasize: 10000 ,1840000,820.0,0.082
+Test - Datasize: 5000,1840000,390.0,0.078
+Train - Datasize: 10000 ,1850000,950.0,0.095
+Test - Datasize: 5000,1850000,500.0,0.1
+Train - Datasize: 10000 ,1860000,760.0,0.076
+Test - Datasize: 5000,1860000,420.0,0.084
+Train - Datasize: 10000 ,1870000,820.0,0.082
+Test - Datasize: 5000,1870000,320.0,0.064
+Train - Datasize: 10000 ,1880000,770.0,0.077
+Test - Datasize: 5000,1880000,470.0,0.094
+Train - Datasize: 10000 ,1890000,850.0,0.085
+Test - Datasize: 5000,1890000,330.0,0.066
+Train - Datasize: 10000 ,1900000,730.0,0.073
+Test - Datasize: 5000,1900000,530.0,0.106
+Train - Datasize: 10000 ,1910000,770.0,0.077
+Test - Datasize: 5000,1910000,580.0,0.116
+Train - Datasize: 10000 ,1920000,900.0,0.09
+Test - Datasize: 5000,1920000,430.0,0.086
+Train - Datasize: 10000 ,1930000,930.0,0.093
+Test - Datasize: 5000,1930000,540.0,0.108
+Train - Datasize: 10000 ,1940000,960.0,0.096
+Test - Datasize: 5000,1940000,580.0,0.116
+Train - Datasize: 10000 ,1950000,1080.0,0.108
+Test - Datasize: 5000,1950000,600.0,0.12
+Train - Datasize: 10000 ,1960000,930.0,0.093
+Test - Datasize: 5000,1960000,450.0,0.09
+Train - Datasize: 10000 ,1970000,920.0,0.092
+Test - Datasize: 5000,1970000,590.0,0.118
+Train - Datasize: 10000 ,1980000,930.0,0.093
+Test - Datasize: 5000,1980000,460.0,0.092
+Train - Datasize: 10000 ,1990000,720.0,0.072
+Test - Datasize: 5000,1990000,430.0,0.086
+Train - Datasize: 10000 ,2000000,1000.0,0.1
+Test - Datasize: 5000,2000000,470.0,0.094

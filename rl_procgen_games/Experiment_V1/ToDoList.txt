@@ -1,0 +1,14 @@
+To do:
+better evaluvation metrics
+save and load model
+eval environments
+find the optimal number of environments
+Try difficult envs
+write intrinsic rewards
+Create option1 and option 2
+structure the codes
+combine options with vanilla policy gradient
+come up with between metrics
+
+Implement wrapper to handle error
+implement multithreading to handle error
