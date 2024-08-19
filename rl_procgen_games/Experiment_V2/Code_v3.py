@@ -14,11 +14,11 @@ Created on Wed Jul 17 10:21:29 2024
 
 
 import os
-os.chdir(r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_procgen_games/Experiment_V2")
+os.chdir(r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V2")
 
-model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_procgen_games/Experiment_V2/Models"
+model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V2/Models"
 
-result_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_procgen_games/Experiment_V2/Results"
+result_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V2/Results"
 
 #import matplotlib.pyplot as plt
 import numpy as np
