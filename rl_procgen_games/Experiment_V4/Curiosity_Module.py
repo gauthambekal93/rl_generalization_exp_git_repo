@@ -26,6 +26,7 @@ import random
 import time 
 import csv 
 import pandas as pd
+import torch.nn.functional as F
 from test_script import test_model
 seed = 42
 torch.manual_seed(seed)
@@ -45,10 +46,11 @@ class Curiosity(nn.Module):
     def __init__(self, obs_shape, n_actions, device):
         super().__init__()
         
-        in_channels = obs_shape[1] + n_actions
+        #in_channels = obs_shape[1] #+ n_actions
+        self.obs_shape = obs_shape
         
         self.conv = nn.Sequential(*[
-                                    nn.Conv2d(in_channels =in_channels , out_channels=32, kernel_size=8, stride=4), 
+                                    nn.Conv2d(in_channels = obs_shape[1] , out_channels=32, kernel_size=8, stride=4), 
                                     nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
                                     nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1)
                                     ] )#.to(self.device)
@@ -57,9 +59,9 @@ class Curiosity(nn.Module):
         
         self.n_actions = n_actions
         
-        self.weight = 0.5 
+        self.weight = 0.9 
         
-        x = torch.zeros(*( 1, in_channels , obs_shape[2], obs_shape[3]) )
+        x = torch.zeros(*( 1, obs_shape[1] , obs_shape[2], obs_shape[3]) )
         
         in_features = self.conv(x).flatten().shape[0] 
         
@@ -68,7 +70,7 @@ class Curiosity(nn.Module):
         out_features =  obs_shape[1] * obs_shape[2] * obs_shape[3]
         
         self.forward_dynamics =nn.Sequential(* [
-                    nn.Linear(in_features, hidden_features),
+                    nn.Linear(in_features +  self.n_actions , hidden_features),
                     nn.ReLU(),
                     nn.Linear(hidden_features, hidden_features),
                     nn.ReLU(),
@@ -77,14 +79,14 @@ class Curiosity(nn.Module):
                     ),  
                 ])
                 
-        self.output_shape = (obs_shape[1], obs_shape[2], obs_shape[3] )
+        #self.output_shape = (obs_shape[1], obs_shape[2], obs_shape[3] )
         
         in_features  = in_features * 2
         
         hidden_features = in_features // 2
         
         self.inverse_dynamics = nn.Sequential(* [
-                    nn.Linear(in_features * 2 , hidden_features),
+                    nn.Linear(in_features , hidden_features),
                     nn.ReLU(),
                     nn.Linear(hidden_features, hidden_features),
                     nn.ReLU(),
@@ -104,47 +106,32 @@ class Curiosity(nn.Module):
         action = torch.tensor(action).to(self.device)
         
         #pass input to convolution nn and flatten them
-        states = self.conv(states)
+        feature_states = self.conv(states)
         
-        states = states.view(states.shape[0], -1)
+        feature_states = feature_states.view(feature_states.shape[0], -1)
         
-        next_states = self.conv(next_states)
+        feature_next_states = self.conv(next_states)
         
-        next_states = next_states.view(states.shape[0], -1)
+        feature_next_states = feature_next_states.view(feature_next_states.shape[0], -1)
         
         #one hot encode the actions
         
         action_one_hot = torch.nn.functional.one_hot(action, num_classes=self.n_actions).float().to(self.device)
         
         #create inputs for forward and inverse dynamics
-        forward_ip =  torch.cat([states, action_one_hot], dim=1)
+        forward_ip =  torch.cat([feature_states, action_one_hot], dim=1)
         
-        inverse_ip = torch.cat([states, next_states], dim=1)
+        inverse_ip = torch.cat([feature_states, feature_next_states], dim=1)
         
         #predict from forward and inverse dynamics
         
         predicted_next_state = self.forward_dynamics(forward_ip)
         
+        predicted_next_state = predicted_next_state.view(-1, *(self.obs_shape[1], self.obs_shape[2], self.obs_shape[3] ) )
+        
         predicted_action = self.inverse_dynamics(inverse_ip)
         
-        #action_one_hot = action_one_hot.view(action_one_hot.shape[0], action_one_hot.shape[1], 1, 1)
-        
-        #action_one_hot = action_one_hot.expand(-1, -1, states.size(2), states.size(3))
-        
-        #action_one_hot = action_one_hot.to(self.device)
-        
-        #state_action_pair = torch.cat([states, action_one_hot], dim=1)
-        
-        #state_action_pair = self.conv(state_action_pair)
-        
-        #state_action_pair = state_action_pair.view(state_action_pair.shape[0],-1 )
-        
-        #predicted_next_state = self.forward_dynamics(state_action_pair)
-        
-        #predicted_next_state = predicted_next_state.view(-1, *self.output_shape) 
-        
-        #predicted_action = self.inverse_dynamics(states, next_states)
-        
+        #calculate the metrics
         forward_loss, inverse_loss, intrinsic_reward = self.metric_calculations( next_states, predicted_next_state, action, predicted_action)
         
         return forward_loss, inverse_loss, intrinsic_reward
@@ -152,13 +139,13 @@ class Curiosity(nn.Module):
         
     def metric_calculations( self, next_state, predicted_next_state, action, predicted_action):
         
-        forward_loss = ( ( next_state - predicted_next_state)**2).mean()
+        forward_loss = F.mse_loss(predicted_next_state, next_state)
         
-        inverse_loss = -1.0 * np.log(predicted_action)
+        inverse_loss = F.cross_entropy(predicted_action, action) 
         
         loss = self.weight * forward_loss + (1- self.weight) * inverse_loss
         
-        intrinsic_reward = -1.0 * forward_loss
+        intrinsic_reward = forward_loss.detach().cpu()
         
         return loss,  intrinsic_reward
 

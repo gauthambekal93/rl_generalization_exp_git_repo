@@ -1,0 +1,18 @@
+       #action_one_hot = action_one_hot.view(action_one_hot.shape[0], action_one_hot.shape[1], 1, 1)
+        
+        #action_one_hot = action_one_hot.expand(-1, -1, states.size(2), states.size(3))
+        
+        #action_one_hot = action_one_hot.to(self.device)
+        
+        #state_action_pair = torch.cat([states, action_one_hot], dim=1)
+        
+        #state_action_pair = self.conv(state_action_pair)
+        
+        #state_action_pair = state_action_pair.view(state_action_pair.shape[0],-1 )
+        
+        #predicted_next_state = self.forward_dynamics(state_action_pair)
+        
+        #predicted_next_state = predicted_next_state.view(-1, *self.output_shape) 
+        
+        #predicted_action = self.inverse_dynamics(states, next_states)
+        
