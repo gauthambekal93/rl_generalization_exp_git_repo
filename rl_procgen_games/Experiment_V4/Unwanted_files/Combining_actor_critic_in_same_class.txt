@@ -1,0 +1,55 @@
+
+
+class Agent(nn.Module):
+    
+    def __init__(self, obs_shape, device, out_features, n_actions):
+        super(Agent, self).__init__()
+        
+        self.conv = nn.Sequential(*[
+                                    nn.Conv2d(in_channels = obs_shape[1], out_channels=32, kernel_size=8, stride=4), 
+                                    nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
+                                    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1)
+                                    ] )
+    
+        in_features = 0
+        
+        self.actor =nn.Sequential (* [
+            nn.Linear(in_features, out_features),
+            nn.ReLU(),
+            nn.Linear(out_features, out_features),
+            nn.ReLU(),
+            nn.Linear(
+                out_features, n_actions
+            ),  # estimate action logits (will be fed into a softmax later)
+        ]).to(self.device)
+        
+    
+        self.critic =nn.Sequential(* [
+            nn.Linear(in_features, out_features),
+            nn.ReLU(),
+            nn.Linear(out_features, out_features),
+            nn.ReLU(),
+            nn.Linear(out_features, 1),  # estimate V(s)
+        ]).to(self.device)
+        
+        
+        
+    def forward_conv(self, x):
+        return self.conv(x)
+    
+                        
+    def forward_actor(self, x):
+        
+        x = torch.Tensor(x).to(self.device)
+        x = self.conv(x)     
+        x = x.view(x.size(0), -1)  # Flatten
+        action_logits_vec = self.actor(x)     
+        return action_logits_vec
+
+    def forward_critic(self, x):
+            
+        x = torch.Tensor(x).to(self.device)
+        x=  self.conv(x)
+        x = x.view(x.size(0), -1)  # Flatten
+        state_values = self.critic(x)
+        return state_values 
