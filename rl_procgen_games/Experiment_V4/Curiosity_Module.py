@@ -335,7 +335,7 @@ def normalize_states(states):
     
     return states
     
-total_timesteps = 1000000 #was 2000000
+total_timesteps = 4000000 #was  1000000
 num_models_saved = 2
 # environment hyperparams
 num_envs = 20 #was 20 #10 #was 20 #worked with one or 2 envs till now 
@@ -350,7 +350,7 @@ gamma = 0.999
 lam = 0.95  # hyperparameter for GAE
 ent_coef = 0.01  # coefficient for the entropy bonus (to encourage exploration)
 
-curiosity_lr = 1e-4
+curiosity_lr = 1e-5 #was 1e-4
 #NEED TO CHECK IF THE LEARNING RATES WHICH ARE OPTIMAL FOR BELOW 3 NETWORKS
 conv_lr = 1e-5 #1e-4 #was 0.001
 actor_lr = 1e-5 #1e-4 # was 0.001
@@ -478,10 +478,11 @@ data = pd.read_csv ( os.path.join(result_path,"Curiosity_Results.csv") )
 
 if len(data)<=1: 
     time_step = 0
+    model_save_step = 0
     #best_reward_rate = 0
 else:
     time_step = int( data.iloc[-1]['Time_Steps'] )
-    
+    model_save_step = time_step + (total_timesteps / num_models_saved )
    # best_reward_rate =  data.loc[data['Type']=='Test']['Reward_Rate'].max() 
     
    # best_time_step = data.loc[ (data["Reward_Rate"] == best_reward_rate) & (data['Type']=='Test') ]['Time_Steps'].iloc[0]
@@ -491,7 +492,7 @@ load_model()
  
 #current_reward_rate  = test_model(actor, critic, time_step, envs_test, result_path, logging_rate ) 
 
-model_save_step = 0
+
 
 while time_step <= total_timesteps:   
      
