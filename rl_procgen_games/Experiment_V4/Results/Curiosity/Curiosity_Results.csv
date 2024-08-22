@@ -1,1 +1,1 @@
-﻿Type,Time_Step,Reward,Reward_Rate,Critic_Loss,Actor_loss,Curiosity_Loss
+﻿Type,Time_Steps,Batch_Reward,Reward_Rate,Critic_Loss,Actor_loss,Curiosity_Loss

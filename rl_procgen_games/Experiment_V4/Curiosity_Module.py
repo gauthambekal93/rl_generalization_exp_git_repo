@@ -335,11 +335,11 @@ def normalize_states(states):
     
     return states
     
-total_timesteps = 200000 #was 2000000
-num_models_saved = 10
+total_timesteps = 1000000 #was 2000000
+num_models_saved = 2
 # environment hyperparams
 num_envs = 20 #was 20 #10 #was 20 #worked with one or 2 envs till now 
-num_train_levels = 20000 #was 10000
+num_train_levels = 1000 #was 10000
 num_test_levels = 10  #was 200
 #n_updates = int( total_timesteps / num_envs) #50000   #was  100000
 n_steps_per_update = 256 #128
@@ -360,13 +360,13 @@ logging_rate = n_steps_per_update* num_envs #10000
         
 envs = ProcgenGym3Env(num= num_envs, 
                       env_name="coinrun", 
-                      render_mode="rgb_array",
+                      #render_mode="rgb_array",
                       num_levels = num_train_levels, 
                       start_level=0,
                       distribution_mode="easy",  #easy
                       use_sequential_levels =False #False #we keep it as True in order to make it easy to obtain levels where we obtain the goals
                       )
-envs = gym3.ViewerWrapper(envs, info_key="rgb")
+#envs = gym3.ViewerWrapper(envs, info_key="rgb")
 
 '''
 envs_test = ProcgenGym3Env(num= num_envs, 
@@ -438,58 +438,72 @@ optimizer = optim.Adam([
 
 
 def save_model(actor, critic, optimizer, time_step, curiosity_model, curiosity_optimizer):
-    print("----SAVE THE MODEL---")
+    print("----SAVE THE MODELS---")
+    
     torch.save(actor.state_dict(), os.path.join(model_path,'actor_'+str(time_step)+'.pth'))
     torch.save(critic.state_dict(), os.path.join(model_path,'critic_'+str(time_step)+'.pth'))
     torch.save(optimizer.state_dict(), os.path.join(model_path,'optimizer_'+str(time_step)+'.pth'))
+    
     torch.save(curiosity_model.state_dict(), os.path.join(model_path,'curiosity_'+str(time_step)+'.pth'))
     torch.save(curiosity_optimizer.state_dict(), os.path.join(model_path,'curiosity_optimizer_'+str(time_step)+'.pth'))
     
 
 
-def load_model(time_step):
-    print("----LOAD THE MODEL---")
-    actor.load_state_dict(torch.load( os.path.join(model_path,'actor_'+str(time_step)+'.pth' )))
-    critic.load_state_dict(torch.load( os.path.join(model_path, 'critic_'+str(time_step)+'.pth' )))
-    optimizer.load_state_dict(torch.load( os.path.join(model_path,'optimizer_'+str(time_step)+'.pth' ) ))
-    curiosity_model.load_state_dict(torch.load( os.path.join(model_path, 'curiosity_'+str(time_step)+'.pth' )))
-    curiosity_optimizer.load_state_dict(torch.load( os.path.join(model_path,'curiosity_optimizer_'+str(time_step)+'.pth' ) ))
+def load_model():
+    print("----LOAD THE MODELS---")
+    
+    last_model_time = [ int(m.name.split("_")[1].replace(".pth","")) for m in os.scandir(model_path) if 'actor' in m.name ]
+    
+    if last_model_time:
+        time_step  = max(last_model_time)
+        
+        actor.load_state_dict(torch.load( os.path.join(model_path,'actor_'+str(time_step)+'.pth' )))
+        critic.load_state_dict(torch.load( os.path.join(model_path, 'critic_'+str(time_step)+'.pth' )))
+        optimizer.load_state_dict(torch.load( os.path.join(model_path,'optimizer_'+str(time_step)+'.pth' ) ))
+        
+        curiosity_model.load_state_dict(torch.load( os.path.join(model_path, 'curiosity_'+str(time_step)+'.pth' )))
+        curiosity_optimizer.load_state_dict(torch.load( os.path.join(model_path,'curiosity_optimizer_'+str(time_step)+'.pth' ) ))
     
 
-total_reward = 0
-time_step = 0
+
+#time_step = 0
 #current_reward_rate = 0
 #best_reward_rate = 0
 
-model_save_step = 0
+
 
 
 data = pd.read_csv ( os.path.join(result_path,"Curiosity_Results.csv") )
+
 
 if len(data)<=1: 
     time_step = 0
     #best_reward_rate = 0
 else:
-    time_step = data.iloc[-1]['Time_Steps']
+    time_step = int( data.iloc[-1]['Time_Steps'] )
     
    # best_reward_rate =  data.loc[data['Type']=='Test']['Reward_Rate'].max() 
     
    # best_time_step = data.loc[ (data["Reward_Rate"] == best_reward_rate) & (data['Type']=='Test') ]['Time_Steps'].iloc[0]
-    
-    load_model(time_step )
- 
 
+
+load_model()
+ 
 #current_reward_rate  = test_model(actor, critic, time_step, envs_test, result_path, logging_rate ) 
 
+model_save_step = 0
 
 while time_step <= total_timesteps:   
+     
      print("Time step ", time_step)
      #parameters for curiosity module loss caluclations
      
+     batch_reward = 0
+     
+     #parameters for actor-critic and curiosity loss calculations
+     
      ep_curiosity_loss = torch.zeros(n_steps_per_update, num_envs, device=device)
       
-     
-     #parameters for actor-critic loss calculations
      ep_value_preds = torch.zeros(n_steps_per_update, num_envs, device=device)
      
      ep_rewards = torch.zeros(n_steps_per_update, num_envs, device=device)
@@ -549,7 +563,7 @@ while time_step <= total_timesteps:
          
          masks[step] =  ongoing_masks 
          
-         total_reward = total_reward + rewards.sum() #mean()
+         batch_reward = batch_reward + rewards.sum() #mean()
          
          time_step = time_step + num_envs
          
@@ -573,33 +587,35 @@ while time_step <= total_timesteps:
      # update the actor and critic networks
      update_parameters(optimizer, critic_loss, actor_loss)
      
-     curiosity_loss = torch.mean(ep_curiosity_loss)
-     
-     curiosity_model.update_curiosity_params( curiosity_loss, curiosity_optimizer)
-     
      critic_loss = critic_loss.detach().cpu().numpy()
      
      actor_loss =  actor_loss.detach().cpu().numpy()
      
+     
+     curiosity_loss = torch.mean(ep_curiosity_loss)
+     
+     curiosity_model.update_curiosity_params( curiosity_loss, curiosity_optimizer)
+     
      curiosity_loss = curiosity_loss.detach().cpu().numpy()
      
-     print("Train: ", "Time Step: ", str(time_step) , "Reward: ", str(total_reward), "Reward Rate: ",str(total_reward / logging_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss )
+     
+     print("Train: ", "Time Step: ", str(time_step) , "Batch Reward: ", str(batch_reward), "Reward Rate: ",str(batch_reward / logging_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss )
      
      
      with open(os.path.join(result_path, "Curiosity_Results.csv"), 'a', newline='') as file:
          
          writer = csv.writer(file)
          
-         writer.writerow([ "Train" , str(time_step) , str(total_reward), str(total_reward / logging_rate), critic_loss, actor_loss, curiosity_loss  ]  )  
+         writer.writerow([ "Train" , str(time_step) , str(batch_reward.item()), str(batch_reward.item() / logging_rate), critic_loss, actor_loss, curiosity_loss  ]  )  
          
          file.close()
          
      
-     total_reward = 0
-     
      if time_step>= model_save_step:
          save_model(actor, critic, optimizer, time_step, curiosity_model, curiosity_optimizer)  #save the best model only
          model_save_step = model_save_step + (total_timesteps / num_models_saved )
+     
+     
      
      '''
      current_reward_rate = test_model(actor, critic, time_step, envs_test, result_path, logging_rate )
@@ -614,7 +630,7 @@ while time_step <= total_timesteps:
      print("Duration per batch data collection", time.time()- start)  
      
      
-
+save_model(actor, critic, optimizer, time_step, curiosity_model, curiosity_optimizer) 
 
 
 
