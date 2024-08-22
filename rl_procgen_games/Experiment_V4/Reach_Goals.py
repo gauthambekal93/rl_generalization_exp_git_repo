@@ -164,19 +164,26 @@ def select_action(x, actor, critic):
         
 def get_losses( rewards, action_log_probs, value_preds, entropy, masks, gamma, lam, ent_coef, device, n_envs):
     
-    T = len(action_log_probs)
+    T = len(rewards)
     advantages = torch.zeros(T, n_envs, device=device)
-    
+
+    # compute the advantages using GAE
     gae = 0.0
-    for t in reversed(range(T-1)):
-        gae = (rewards[t] + gamma * value_preds[t+1] - value_preds[t]) + gamma * gae
-        advantages[t] = gae    
-        
-    actor_loss =  - ( advantages.detach() * action_log_probs ).mean() - ent_coef * entropy.mean()  
-    
-    critic_loss =  advantages.pow(2).mean()
+    for t in reversed(range(T - 1)):
+        td_error = (
+            rewards[t] + gamma * masks[t] * value_preds[t + 1] - value_preds[t]
+        )
+        gae = td_error + gamma * lam * masks[t] * gae
+        advantages[t] = gae
+
+    # calculate the loss of the minibatch for actor and critic
+    critic_loss = advantages.pow(2).mean()
+
+    # give a bonus for higher entropy to encourage exploration
+    actor_loss =  -(advantages.detach() * action_log_probs).mean() - ent_coef * entropy.mean()  
     
     return (critic_loss, actor_loss)
+
 
 
     

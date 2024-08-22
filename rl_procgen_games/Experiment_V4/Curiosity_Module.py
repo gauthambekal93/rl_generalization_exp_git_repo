@@ -8,9 +8,9 @@ Created on Wed Aug 21 08:00:57 2024
 import os
 os.chdir(r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4")
 
-model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Models"
+model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Models/Curiosity_Model"
 
-result_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Results"
+result_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Results/Curiosity_Model"
 
 import numpy as np
 import torch
@@ -132,26 +132,38 @@ class Curiosity(nn.Module):
         predicted_action = self.inverse_dynamics(inverse_ip)
         
         #calculate the metrics
-        forward_loss, inverse_loss, intrinsic_reward = self.metric_calculations( next_states, predicted_next_state, action, predicted_action)
+        loss, intrinsic_reward = self.metric_calculations( next_states, predicted_next_state, action, predicted_action)
         
-        return forward_loss, inverse_loss, intrinsic_reward
+        return loss, intrinsic_reward
         
         
     def metric_calculations( self, next_state, predicted_next_state, action, predicted_action):
         
-        forward_loss = F.mse_loss(predicted_next_state, next_state)
+        squared_error = F.mse_loss(predicted_next_state, next_state, reduction='none')
         
-        inverse_loss = F.cross_entropy(predicted_action, action) 
+        forward_loss  = squared_error.mean(dim=(1, 2, 3))
         
-        loss = self.weight * forward_loss + (1- self.weight) * inverse_loss
+        #forward_loss = F.mse_loss(predicted_next_state, next_state)
         
-        intrinsic_reward = forward_loss.detach().cpu()
+        inverse_loss = F.cross_entropy(predicted_action, action, reduction='none') 
         
-        return loss,  intrinsic_reward
+        losses = self.weight * forward_loss + (1- self.weight) * inverse_loss
+        
+        intrinsic_rewards = forward_loss.detach().cpu()
+        
+        
+        return losses,  intrinsic_rewards
+    
 
-
-
-
+    def update_curiosity_params(self, curiosity_loss, curiosity_optimizer):
+        
+        curiosity_optimizer.zero_grad()
+        
+        curiosity_loss.backward()
+        
+        curiosity_optimizer.step()
+        
+    
 
 class SharedConv(nn.Module):
     
@@ -255,17 +267,23 @@ def select_action(x, actor, critic):
         
 def get_losses( rewards, action_log_probs, value_preds, entropy, masks, gamma, lam, ent_coef, device, n_envs):
     
-    T = len(action_log_probs)
+    T = len(rewards)
     advantages = torch.zeros(T, n_envs, device=device)
-    
+
+    # compute the advantages using GAE
     gae = 0.0
-    for t in reversed(range(T-1)):
-        gae = (rewards[t] + gamma * value_preds[t+1] - value_preds[t]) + gamma * gae
-        advantages[t] = gae    
-        
-    actor_loss =  - ( advantages.detach() * action_log_probs ).mean() - ent_coef * entropy.mean()  
-    
-    critic_loss =  advantages.pow(2).mean()
+    for t in reversed(range(T - 1)):
+        td_error = (
+            rewards[t] + gamma * masks[t] * value_preds[t + 1] - value_preds[t]
+        )
+        gae = td_error + gamma * lam * masks[t] * gae
+        advantages[t] = gae
+
+    # calculate the loss of the minibatch for actor and critic
+    critic_loss = advantages.pow(2).mean()
+
+    # give a bonus for higher entropy to encourage exploration
+    actor_loss =  -(advantages.detach() * action_log_probs).mean() - ent_coef * entropy.mean()  
     
     return (critic_loss, actor_loss)
 
@@ -309,11 +327,19 @@ def stack_frames(frames, states, num_envs, is_new_episode):  #frame shape (numen
     return stacked_frames, frames
 
    
+def normalize_states(states):
+    
+    pixel_min, pixel_max  = states.min(), states.max()
+    
+    states = (states - pixel_min) / (pixel_max - pixel_min)
+    
+    return states
     
 total_timesteps = 8000000 #was 2000000
 # environment hyperparams
-num_envs = 20 #was 20 #10 #was 20 #worked with one or 2 envs till now
-num_levels = 10000# 5000 #was 1  this shows number of unique levels
+num_envs = 20 #was 20 #10 #was 20 #worked with one or 2 envs till now 
+num_train_levels = 10 #was 10000
+num_test_levels = 10  #was 200
 #n_updates = int( total_timesteps / num_envs) #50000   #was  100000
 n_steps_per_update = 256 #128
 #randomize_domain = False
@@ -322,6 +348,8 @@ n_steps_per_update = 256 #128
 gamma = 0.999
 lam = 0.95  # hyperparameter for GAE
 ent_coef = 0.01  # coefficient for the entropy bonus (to encourage exploration)
+
+curiosity_lr = 1e-4
 #NEED TO CHECK IF THE LEARNING RATES WHICH ARE OPTIMAL FOR BELOW 3 NETWORKS
 conv_lr = 1e-5 #1e-4 #was 0.001
 actor_lr = 1e-5 #1e-4 # was 0.001
@@ -331,19 +359,19 @@ logging_rate = n_steps_per_update* num_envs #10000
         
 envs = ProcgenGym3Env(num= num_envs, 
                       env_name="coinrun", 
-                      #render_mode="rgb_array",
-                      num_levels=num_levels,
+                      render_mode="rgb_array",
+                      num_levels = num_train_levels, 
                       start_level=0,
                       distribution_mode="easy",  #easy
-                      use_sequential_levels =False
+                      use_sequential_levels =True #False #we keep it as True in order to make it easy to obtain levels where we obtain the goals
                       )
-#envs = gym3.ViewerWrapper(envs, info_key="rgb")
+envs = gym3.ViewerWrapper(envs, info_key="rgb")
 
 
 envs_test = ProcgenGym3Env(num= num_envs, 
                       env_name="coinrun", 
-                      #render_mode="rgb_array",
-                      num_levels=200,
+                      render_mode="rgb_array",
+                      num_levels = num_test_levels, #was 200
                       start_level=15000,
                       distribution_mode="easy",  #easy
                       use_sequential_levels=True
@@ -367,6 +395,8 @@ frames = []
 
 states, frames = stack_frames(frames, states, num_envs, is_new_episode = True)
 
+states = normalize_states(states)
+
 obs_shape = (states.shape[0], states.shape[1], states.shape[2], states.shape[3]) #env_num, history of frames, x dim, y dim
 
 
@@ -379,6 +409,10 @@ else:
     device = torch.device("cpu")
 
 curiosity_model = Curiosity(obs_shape, num_actions, device).to(device)
+
+curiosity_optimizer = optim.Adam([ {'params': curiosity_model.parameters(), 'lr': curiosity_lr}  ])
+
+
 
 shared_conv = SharedConv(obs_shape, device).to(device)
 
@@ -397,6 +431,8 @@ optimizer = optim.Adam([
     {'params': actor.actor.parameters(), 'lr': actor_lr},
     {'params': critic.critic.parameters(), 'lr': critic_lr}
 ])
+
+
 
 
 def save_model(actor, critic, optimizer, time_step):
@@ -437,7 +473,7 @@ current_reward_rate  = test_model(actor, critic, time_step, envs_test, result_pa
 '''
 
 while time_step <= total_timesteps:   
-    
+     print("Time step ", time_step)
      #parameters for curiosity module loss caluclations
      
      ep_curiosity_loss = torch.zeros(n_steps_per_update, num_envs, device=device)
@@ -462,16 +498,19 @@ while time_step <= total_timesteps:
      
      states, frames = stack_frames(frames, states, num_envs, is_new_episode = False)
      
+     states = normalize_states(states)
+     
      start = time.time() 
      # play n steps in our parallel environments to collect data
      for step in range(n_steps_per_update):
 
          actions, action_log_probs, state_value_preds, entropy = select_action( states, actor, critic )
  
-         # perform the action A_{t} in the environment to get S_{t+1} and R_{t+1}    
          actions = np.array(actions.cpu().detach())
          
          envs.act( actions  )
+         
+         #print("Step ", step, "Action ", actions[0])
          
          _, next_states, terminated = envs.observe()
          
@@ -480,32 +519,33 @@ while time_step <= total_timesteps:
          next_states = preprocess_image_rgb(next_states)
          
          next_states, frames = stack_frames(frames, next_states, num_envs, is_new_episode = False)
-     
-        
+         
+         next_states = normalize_states(next_states)
+         
          curiosity_loss, rewards = curiosity_model( states, next_states, actions)
+     
          
-         ep_curiosity_loss[step] = torch.squeeze(curiosity_loss)
          
-         total_reward = total_reward + rewards.sum() #mean() 
-         
-         time_step = time_step + num_envs
-         
+         ep_curiosity_loss[step] =  torch.squeeze ( curiosity_loss ) 
          
          ep_value_preds[step] = torch.squeeze(state_value_preds)
          
-         ep_rewards[step] = torch.tensor(rewards, device=device)
+         ep_rewards[step] = torch.squeeze(rewards)
          
          ep_action_log_probs[step] = action_log_probs
-         
+ 
          # Update ongoing_masks to ensure terminated episodes remain terminated
          ongoing_masks *= torch.tensor([not term for term in terminated], device=device)
          
-         # add a mask (for the return calculation later);
-         # for each env the mask is 1 if the episode is ongoing and 0 if it is terminated (not by truncation!)
          masks[step] =  ongoing_masks 
-       
+         
+         total_reward = total_reward + rewards.sum() #mean()
+         
+         time_step = time_step + num_envs
+         
          states = next_states
-     # calculate the losses for actor and critic
+     
+        # calculate the losses for actor and critic
      critic_loss, actor_loss = get_losses(
          ep_rewards,
          ep_action_log_probs,
@@ -519,37 +559,43 @@ while time_step <= total_timesteps:
          num_envs
      )
  
+    
      # update the actor and critic networks
      update_parameters(optimizer, critic_loss, actor_loss)
+     
+     curiosity_loss = torch.mean(ep_curiosity_loss)
+     
+     curiosity_model.update_curiosity_params( curiosity_loss, curiosity_optimizer)
      
      critic_loss = critic_loss.detach().cpu().numpy()
      
      actor_loss =  actor_loss.detach().cpu().numpy()
      
-     print("Train: ", "Time Step: ", str(time_step) , "Reward: ", str(total_reward), "Reward Rate: ",str(current_reward_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Total Loss: ",  actor_loss + critic_loss )
-     '''
+     curiosity_loss = curiosity_loss.detach().cpu().numpy()
+     
+     print("Train: ", "Time Step: ", str(time_step) , "Reward: ", str(total_reward), "Reward Rate: ",str(current_reward_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss )
+     
+     
      with open(os.path.join(result_path, "Results.csv"), 'a', newline='') as file:
          
          writer = csv.writer(file)
          
-         writer.writerow([ "Train" , str(time_step) , str(total_reward), str(total_reward / logging_rate), critic_loss, actor_loss, actor_loss + critic_loss  ]  )  
+         writer.writerow([ "Train" , str(time_step) , str(total_reward), str(total_reward / logging_rate), critic_loss, actor_loss, critic_loss  ]  )  
          
          file.close()
-     '''    
+         
+     
      total_reward = 0
      
+     '''
      current_reward_rate = test_model(actor, critic, time_step, envs_test, result_path, logging_rate )
      
      if best_reward_rate < current_reward_rate:
          save_model(actor, critic, optimizer, time_step)  #save the best model only
          best_reward_rate = current_reward_rate
          
-         
-     # log the losses and entropy
-     #critic_losses.append(critic_loss)
-     #actor_losses.append(actor_loss)
-     #entropies.append(entropy.detach().mean().cpu().numpy())
-     
+     '''    
+   
      
      print("Duration per batch data collection", time.time()- start)  
      
