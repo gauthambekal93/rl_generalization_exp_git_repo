@@ -8,9 +8,9 @@ Created on Wed Aug 21 08:00:57 2024
 import os
 os.chdir(r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4")
 
-model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Models/Curiosity_Model"
+model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Models/Curiosity"
 
-result_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Results/Curiosity_Model"
+result_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Results/Curiosity"
 
 import numpy as np
 import torch
@@ -335,10 +335,11 @@ def normalize_states(states):
     
     return states
     
-total_timesteps = 8000000 #was 2000000
+total_timesteps = 200000 #was 2000000
+num_models_saved = 10
 # environment hyperparams
 num_envs = 20 #was 20 #10 #was 20 #worked with one or 2 envs till now 
-num_train_levels = 10 #was 10000
+num_train_levels = 20000 #was 10000
 num_test_levels = 10  #was 200
 #n_updates = int( total_timesteps / num_envs) #50000   #was  100000
 n_steps_per_update = 256 #128
@@ -363,11 +364,11 @@ envs = ProcgenGym3Env(num= num_envs,
                       num_levels = num_train_levels, 
                       start_level=0,
                       distribution_mode="easy",  #easy
-                      use_sequential_levels =True #False #we keep it as True in order to make it easy to obtain levels where we obtain the goals
+                      use_sequential_levels =False #False #we keep it as True in order to make it easy to obtain levels where we obtain the goals
                       )
 envs = gym3.ViewerWrapper(envs, info_key="rgb")
 
-
+'''
 envs_test = ProcgenGym3Env(num= num_envs, 
                       env_name="coinrun", 
                       render_mode="rgb_array",
@@ -377,6 +378,7 @@ envs_test = ProcgenGym3Env(num= num_envs,
                       use_sequential_levels=True
                       )
 #envs_test = gym3.ViewerWrapper(envs_test, info_key="rgb")
+'''
 
 num_actions = envs.ac_space.eltype.n        
 
@@ -435,42 +437,50 @@ optimizer = optim.Adam([
 
 
 
-def save_model(actor, critic, optimizer, time_step):
+def save_model(actor, critic, optimizer, time_step, curiosity_model, curiosity_optimizer):
     print("----SAVE THE MODEL---")
     torch.save(actor.state_dict(), os.path.join(model_path,'actor_'+str(time_step)+'.pth'))
     torch.save(critic.state_dict(), os.path.join(model_path,'critic_'+str(time_step)+'.pth'))
     torch.save(optimizer.state_dict(), os.path.join(model_path,'optimizer_'+str(time_step)+'.pth'))
+    torch.save(curiosity_model.state_dict(), os.path.join(model_path,'curiosity_'+str(time_step)+'.pth'))
+    torch.save(curiosity_optimizer.state_dict(), os.path.join(model_path,'curiosity_optimizer_'+str(time_step)+'.pth'))
+    
 
 
-def load_model(best_time_step):
+def load_model(time_step):
     print("----LOAD THE MODEL---")
-    actor.load_state_dict(torch.load( os.path.join(model_path,'actor_'+str(best_time_step)+'.pth' )))
-    critic.load_state_dict(torch.load( os.path.join(model_path, 'critic_'+str(best_time_step)+'.pth' )))
-    optimizer.load_state_dict(torch.load( os.path.join(model_path,'optimizer_'+str(best_time_step)+'.pth' ) ))
+    actor.load_state_dict(torch.load( os.path.join(model_path,'actor_'+str(time_step)+'.pth' )))
+    critic.load_state_dict(torch.load( os.path.join(model_path, 'critic_'+str(time_step)+'.pth' )))
+    optimizer.load_state_dict(torch.load( os.path.join(model_path,'optimizer_'+str(time_step)+'.pth' ) ))
+    curiosity_model.load_state_dict(torch.load( os.path.join(model_path, 'curiosity_'+str(time_step)+'.pth' )))
+    curiosity_optimizer.load_state_dict(torch.load( os.path.join(model_path,'curiosity_optimizer_'+str(time_step)+'.pth' ) ))
+    
 
 total_reward = 0
 time_step = 0
-current_reward_rate = 0
-best_reward_rate = 0
+#current_reward_rate = 0
+#best_reward_rate = 0
 
-'''
-data = pd.read_csv ( os.path.join(result_path,"Results.csv") )
+model_save_step = 0
+
+
+data = pd.read_csv ( os.path.join(result_path,"Curiosity_Results.csv") )
 
 if len(data)<=1: 
     time_step = 0
-    best_reward_rate = 0
+    #best_reward_rate = 0
 else:
     time_step = data.iloc[-1]['Time_Steps']
     
-    best_reward_rate =  data.loc[data['Type']=='Test']['Reward_Rate'].max() 
+   # best_reward_rate =  data.loc[data['Type']=='Test']['Reward_Rate'].max() 
     
-    best_time_step = data.loc[ (data["Reward_Rate"] == best_reward_rate) & (data['Type']=='Test') ]['Time_Steps'].iloc[0]
+   # best_time_step = data.loc[ (data["Reward_Rate"] == best_reward_rate) & (data['Type']=='Test') ]['Time_Steps'].iloc[0]
     
-    load_model(best_time_step )
+    load_model(time_step )
  
 
-current_reward_rate  = test_model(actor, critic, time_step, envs_test, result_path, logging_rate ) 
-'''
+#current_reward_rate  = test_model(actor, critic, time_step, envs_test, result_path, logging_rate ) 
+
 
 while time_step <= total_timesteps:   
      print("Time step ", time_step)
@@ -573,19 +583,23 @@ while time_step <= total_timesteps:
      
      curiosity_loss = curiosity_loss.detach().cpu().numpy()
      
-     print("Train: ", "Time Step: ", str(time_step) , "Reward: ", str(total_reward), "Reward Rate: ",str(current_reward_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss )
+     print("Train: ", "Time Step: ", str(time_step) , "Reward: ", str(total_reward), "Reward Rate: ",str(total_reward / logging_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss )
      
      
-     with open(os.path.join(result_path, "Results.csv"), 'a', newline='') as file:
+     with open(os.path.join(result_path, "Curiosity_Results.csv"), 'a', newline='') as file:
          
          writer = csv.writer(file)
          
-         writer.writerow([ "Train" , str(time_step) , str(total_reward), str(total_reward / logging_rate), critic_loss, actor_loss, critic_loss  ]  )  
+         writer.writerow([ "Train" , str(time_step) , str(total_reward), str(total_reward / logging_rate), critic_loss, actor_loss, curiosity_loss  ]  )  
          
          file.close()
          
      
      total_reward = 0
+     
+     if time_step>= model_save_step:
+         save_model(actor, critic, optimizer, time_step, curiosity_model, curiosity_optimizer)  #save the best model only
+         model_save_step = model_save_step + (total_timesteps / num_models_saved )
      
      '''
      current_reward_rate = test_model(actor, critic, time_step, envs_test, result_path, logging_rate )
