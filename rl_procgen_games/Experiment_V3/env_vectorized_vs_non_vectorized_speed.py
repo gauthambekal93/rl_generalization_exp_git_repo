@@ -36,6 +36,8 @@ print("Time taken for vectorized env", time.time() -start)
 env = gym.make("procgen:procgen-coinrun-v0", start_level=0, num_levels=1, distribution_mode="easy")
 state =  env.reset()
  
+
+
 step = 0
 start = time.time()
 max_step = 20000 

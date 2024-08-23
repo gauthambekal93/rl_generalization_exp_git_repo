@@ -350,7 +350,7 @@ gamma = 0.999
 lam = 0.95  # hyperparameter for GAE
 ent_coef = 0.01  # coefficient for the entropy bonus (to encourage exploration)
 
-curiosity_lr = 1e-5 #was 1e-4  upto 1000000
+curiosity_lr = 1e-5 #was 1e-4
 #NEED TO CHECK IF THE LEARNING RATES WHICH ARE OPTIMAL FOR BELOW 3 NETWORKS
 conv_lr = 1e-5 #1e-4 #was 0.001
 actor_lr = 1e-5 #1e-4 # was 0.001
