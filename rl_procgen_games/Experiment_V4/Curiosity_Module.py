@@ -49,49 +49,55 @@ class Curiosity(nn.Module):
         #in_channels = obs_shape[1] #+ n_actions
         self.obs_shape = obs_shape
         
-        self.conv = nn.Sequential(*[
-                                    nn.Conv2d(in_channels = obs_shape[1] , out_channels=32, kernel_size=8, stride=4), 
-                                    nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
-                                    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1)
-                                    ] )#.to(self.device)
-        
         self.device = device
         
         self.n_actions = n_actions
         
-        self.weight = 0.9 
+        self.weight_forward = 1.0
+        
+        self.weight_inverse = 1.0 
+        
+        self.conv = nn.Sequential(*[
+                                    nn.Conv2d(in_channels = obs_shape[1] , out_channels=32, kernel_size=8, stride=4), 
+                                    nn.ReLU(),
+                                    nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
+                                    nn.ReLU(),
+                                    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
+                                    nn.ReLU()
+                                    ] )#.to(self.device)
+        
         
         x = torch.zeros(*( 1, obs_shape[1] , obs_shape[2], obs_shape[3]) )
         
         in_features = self.conv(x).flatten().shape[0] 
         
-        hidden_features = in_features // 2
+        hidden_features_1 = in_features // 2
         
-        out_features =  obs_shape[1] * obs_shape[2] * obs_shape[3]
+        self.reduce =  nn.Sequential( *[ nn.Linear(in_features, hidden_features_1 ),
+                                        nn.ReLU() ] )
+        
+        hidden_features_2 = hidden_features_1 // 2
+        
+        out_features =  hidden_features_1 #obs_shape[1] * obs_shape[2] * obs_shape[3]
         
         self.forward_dynamics =nn.Sequential(* [
-                    nn.Linear(in_features +  self.n_actions , hidden_features),
+                    nn.Linear(hidden_features_1 +  self.n_actions , hidden_features_2),
                     nn.ReLU(),
-                    nn.Linear(hidden_features, hidden_features),
+                    nn.Linear(hidden_features_2, hidden_features_2),
                     nn.ReLU(),
                     nn.Linear(
-                    hidden_features, out_features
+                    hidden_features_2, out_features
                     ),  
                 ])
                 
-        #self.output_shape = (obs_shape[1], obs_shape[2], obs_shape[3] )
-        
-        in_features  = in_features * 2
-        
-        hidden_features = in_features // 2
         
         self.inverse_dynamics = nn.Sequential(* [
-                    nn.Linear(in_features , hidden_features),
+                    nn.Linear(hidden_features_1 * 2 , hidden_features_2),
                     nn.ReLU(),
-                    nn.Linear(hidden_features, hidden_features),
+                    nn.Linear(hidden_features_2, hidden_features_2),
                     nn.ReLU(),
                     nn.Linear(
-                    hidden_features, n_actions
+                    hidden_features_2, n_actions
                     ), 
                 ])
                 
@@ -110,10 +116,13 @@ class Curiosity(nn.Module):
         
         feature_states = feature_states.view(feature_states.shape[0], -1)
         
+        feature_states = self.reduce(feature_states) 
+        
         feature_next_states = self.conv(next_states)
         
         feature_next_states = feature_next_states.view(feature_next_states.shape[0], -1)
         
+        feature_next_states = self.reduce(feature_next_states)
         #one hot encode the actions
         
         action_one_hot = torch.nn.functional.one_hot(action, num_classes=self.n_actions).float().to(self.device)
@@ -127,32 +136,35 @@ class Curiosity(nn.Module):
         
         predicted_next_state = self.forward_dynamics(forward_ip)
         
-        predicted_next_state = predicted_next_state.view(-1, *(self.obs_shape[1], self.obs_shape[2], self.obs_shape[3] ) )
+        #predicted_next_state = predicted_next_state.view(-1, *(self.obs_shape[1], self.obs_shape[2], self.obs_shape[3] ) )
         
         predicted_action = self.inverse_dynamics(inverse_ip)
         
         #calculate the metrics
-        loss, intrinsic_reward = self.metric_calculations( next_states, predicted_next_state, action, predicted_action)
+        #loss, intrinsic_reward = self.metric_calculations( next_states, predicted_next_state, action, predicted_action)
+        loss,  forward_loss, inverse_loss , intrinsic_reward = self.metric_calculations( feature_next_states, predicted_next_state, action, predicted_action)
         
-        return loss, intrinsic_reward
+        return loss,  forward_loss, inverse_loss , intrinsic_reward
         
         
-    def metric_calculations( self, next_state, predicted_next_state, action, predicted_action):
+    def metric_calculations( self, feature_next_states, predicted_next_state, action, predicted_action):
         
-        squared_error = F.mse_loss(predicted_next_state, next_state, reduction='none')
+        #squared_error = F.mse_loss(predicted_next_state, next_state, reduction='none')
+        squared_error = F.mse_loss(predicted_next_state, feature_next_states, reduction='none')
         
-        forward_loss  = squared_error.mean(dim=(1, 2, 3))
+        #forward_loss  = squared_error.mean(dim=(1, 2, 3))
+        forward_loss  = squared_error.mean(dim=(1))
         
         #forward_loss = F.mse_loss(predicted_next_state, next_state)
         
         inverse_loss = F.cross_entropy(predicted_action, action, reduction='none') 
         
-        losses = self.weight * forward_loss + (1- self.weight) * inverse_loss
+        losses = self.weight_forward * forward_loss + self.weight_inverse * inverse_loss
         
         intrinsic_rewards = forward_loss.detach().cpu()
         
         
-        return losses,  intrinsic_rewards
+        return losses,  forward_loss, inverse_loss , intrinsic_rewards
     
 
     def update_curiosity_params(self, curiosity_loss, curiosity_optimizer):
@@ -172,8 +184,11 @@ class SharedConv(nn.Module):
         
         self.conv = nn.Sequential(*[
                                     nn.Conv2d(in_channels = obs_shape[1], out_channels=32, kernel_size=8, stride=4), 
+                                    nn.ReLU(),
                                     nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
-                                    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1)
+                                    nn.ReLU(),
+                                    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
+                                    nn.ReLU()
                                     ] )
         
         self.device = device
@@ -335,11 +350,11 @@ def normalize_states(states):
     
     return states
     
-total_timesteps = 4000000 #was  1000000
-num_models_saved = 2
+total_timesteps = 50000000#6000000 #was 1000000 
+num_models_saved = 5 #was 2
 # environment hyperparams
 num_envs = 20 #was 20 #10 #was 20 #worked with one or 2 envs till now 
-num_train_levels = 1000 #was 10000
+num_train_levels = 50000 #was 10000
 num_test_levels = 10  #was 200
 #n_updates = int( total_timesteps / num_envs) #50000   #was  100000
 n_steps_per_update = 256 #128
@@ -350,7 +365,7 @@ gamma = 0.999
 lam = 0.95  # hyperparameter for GAE
 ent_coef = 0.01  # coefficient for the entropy bonus (to encourage exploration)
 
-curiosity_lr = 1e-5 #was 1e-4
+curiosity_lr = 1e-4 #was 1e-4
 #NEED TO CHECK IF THE LEARNING RATES WHICH ARE OPTIMAL FOR BELOW 3 NETWORKS
 conv_lr = 1e-5 #1e-4 #was 0.001
 actor_lr = 1e-5 #1e-4 # was 0.001
@@ -420,7 +435,7 @@ shared_conv = SharedConv(obs_shape, device).to(device)
 
 in_features = shared_conv( torch.zeros(1, *obs_shape[1:] ).to(device) ).view(-1).shape[0]  #shared_conv.get_feature_size()  #1024
 
-out_features = 32
+out_features = 512  #was 32   #THIS seems very low !!!
 
 actor =  Actor(shared_conv, in_features, out_features, num_actions, device).to(device)
 
@@ -490,9 +505,8 @@ else:
 
 load_model()
  
-#current_reward_rate  = test_model(actor, critic, time_step, envs_test, result_path, logging_rate ) 
 
-
+#time_step =0
 
 while time_step <= total_timesteps:   
      
@@ -504,7 +518,11 @@ while time_step <= total_timesteps:
      #parameters for actor-critic and curiosity loss calculations
      
      ep_curiosity_loss = torch.zeros(n_steps_per_update, num_envs, device=device)
-      
+     
+     ep_forward_loss = torch.zeros(n_steps_per_update, num_envs, device=device)
+     
+     ep_inverse_loss = torch.zeros(n_steps_per_update, num_envs, device=device)
+     
      ep_value_preds = torch.zeros(n_steps_per_update, num_envs, device=device)
      
      ep_rewards = torch.zeros(n_steps_per_update, num_envs, device=device)
@@ -547,11 +565,15 @@ while time_step <= total_timesteps:
          
          next_states = normalize_states(next_states)
          
-         curiosity_loss, rewards = curiosity_model( states, next_states, actions)
+         curiosity_loss,  forward_loss, inverse_loss, rewards = curiosity_model( states, next_states, actions)
      
          
          
          ep_curiosity_loss[step] =  torch.squeeze ( curiosity_loss ) 
+         
+         ep_forward_loss[step] =  torch.squeeze ( forward_loss ) 
+         
+         ep_inverse_loss[step] =  torch.squeeze ( inverse_loss ) 
          
          ep_value_preds[step] = torch.squeeze(state_value_preds)
          
@@ -599,15 +621,16 @@ while time_step <= total_timesteps:
      
      curiosity_loss = curiosity_loss.detach().cpu().numpy()
      
+     forward_loss, inverse_loss = torch.mean(ep_forward_loss).detach().cpu().numpy(),  torch.mean(ep_inverse_loss).detach().cpu().numpy() 
      
-     print("Train: ", "Time Step: ", str(time_step) , "Batch Reward: ", str(batch_reward), "Reward Rate: ",str(batch_reward / logging_rate), "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss )
+     print("Train: ", "Time Step: ",time_step , "Batch Reward: ", batch_reward, "Reward Rate: ", batch_reward / logging_rate, "Critic Loss: ", critic_loss, "Actor Loss: ", actor_loss, "Curiosity Loss: ",  curiosity_loss, "Forward Loss: ", forward_loss, "Inverse Loss: ", inverse_loss )
      
      
      with open(os.path.join(result_path, "Curiosity_Results.csv"), 'a', newline='') as file:
          
          writer = csv.writer(file)
          
-         writer.writerow([ "Train" , str(time_step) , str(batch_reward.item()), str(batch_reward.item() / logging_rate), critic_loss, actor_loss, curiosity_loss  ]  )  
+         writer.writerow([ "Train" , time_step , batch_reward.item(), batch_reward.item() / logging_rate, critic_loss, actor_loss, curiosity_loss, forward_loss,inverse_loss  ]  )  
          
          file.close()
          

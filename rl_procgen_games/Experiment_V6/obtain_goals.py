@@ -7,9 +7,9 @@ Created on Thu Aug 22 18:04:21 2024
 
 
 import os
-os.chdir(r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4")
+os.chdir(r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V6")
 
-model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Models/Curiosity"
+model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V6/Models/Curiosity"
 
 #model_path =r"C:/Users/gauthambekal93/Research/rl_generalization_exps/rl_generalization_exp_git_repo/rl_procgen_games/Experiment_V4/Models/Curiosity"
 
@@ -42,8 +42,6 @@ if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         
-
-
 class Curiosity(nn.Module):
     
     def __init__(self, obs_shape, n_actions, device):
@@ -62,10 +60,13 @@ class Curiosity(nn.Module):
         
         self.conv = nn.Sequential(*[
                                     nn.Conv2d(in_channels = obs_shape[1] , out_channels=32, kernel_size=8, stride=4), 
+                                    nn.BatchNorm2d(32),
                                     nn.ReLU(),
                                     nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
+                                    nn.BatchNorm2d(64),
                                     nn.ReLU(),
                                     nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
+                                    nn.BatchNorm2d(64),
                                     nn.ReLU()
                                     ] )#.to(self.device)
         
@@ -79,7 +80,7 @@ class Curiosity(nn.Module):
         self.reduce =  nn.Sequential( *[ nn.Linear(in_features, hidden_features_1 ),
                                         nn.ReLU() ] )
         
-        hidden_features_2 = hidden_features_1 // 2
+        hidden_features_2 = hidden_features_1 // 4
         
         out_features =  hidden_features_1 #obs_shape[1] * obs_shape[2] * obs_shape[3]
         
@@ -187,10 +188,13 @@ class SharedConv(nn.Module):
         
         self.conv = nn.Sequential(*[
                                     nn.Conv2d(in_channels = obs_shape[1], out_channels=32, kernel_size=8, stride=4), 
+                                    nn.BatchNorm2d(32),
                                     nn.ReLU(),
                                     nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2), 
+                                    nn.BatchNorm2d(64),
                                     nn.ReLU(),
                                     nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1),
+                                    nn.BatchNorm2d(64),
                                     nn.ReLU()
                                     ] )
         
@@ -261,8 +265,6 @@ class Critic(nn.Module):
         return state_values
         
                 
-
-
         
 def select_action(x, actor, critic):
     
@@ -366,7 +368,7 @@ else:
                           render_mode="rgb_array",
                           num_levels = num_levels, 
                           start_level = start_level,
-                          distribution_mode="hard",  #easy
+                          distribution_mode="easy",  #easy
                           use_sequential_levels =False #False #we keep it as True in order to make it easy to obtain levels where we obtain the goals
                           )
     env = gym3.ViewerWrapper(env, info_key="rgb")
@@ -420,7 +422,7 @@ shared_conv = SharedConv(obs_shape, device).to(device)
 
 in_features = shared_conv( torch.zeros(1, *obs_shape[1:] ).to(device) ).view(-1).shape[0]  #shared_conv.get_feature_size()  #1024
 
-out_features = 512
+out_features = 512 #was 32
 
 actor =  Actor(shared_conv, in_features, out_features, num_actions, device).to(device)
 

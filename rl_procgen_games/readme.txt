@@ -22,3 +22,13 @@ Experiment_V3
 ==> This forlder is primarily around performance measures
 
 Experiment_V4
+==> we used easy levels, from 0 to 50000
+==> we found that model does not explore very well, and sates such as goal states were given very low reward.
+==> one possibility is our model is too complex and predicts even slightly novel states very well.
+==> To prevent this we may reduce the hidden layer size of curiosity module so that, it has hard time predicting even slighlt novel states thus increasing error and reward, which forces agent to explore further.
+
+
+Experiment_V5
+==> Uses a combination of extrinsic and intrinsic rewards
+
+Experiment_V6
